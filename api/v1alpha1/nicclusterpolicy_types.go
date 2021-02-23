@@ -95,6 +95,7 @@ type NicClusterPolicySpec struct {
 	OFEDDriver             *OFEDDriverSpec       `json:"ofedDriver,omitempty"`
 	NVPeerDriver           *NVPeerDriverSpec     `json:"nvPeerDriver,omitempty"`
 	RdmaSharedDevicePlugin *DevicePluginSpec     `json:"rdmaSharedDevicePlugin,omitempty"`
+	SriovDevicePlugin      *DevicePluginSpec     `json:"sriovDevicePlugin,omitempty"`
 	SecondaryNetwork       *SecondaryNetworkSpec `json:"secondaryNetwork,omitempty"`
 }
 
@@ -120,7 +121,7 @@ type NicClusterPolicyStatus struct {
 }
 
 // +kubebuilder:object:root=true
-// kubebuilder:object:generate
+// +kubebuilder:object:generate=true
 // +kubebuilder:subresource:status
 // +kubebuilder:resource:scope=Cluster
 // +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.state`,priority=0
