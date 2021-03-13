@@ -60,6 +60,7 @@ type stateHostDeviceNetwork struct {
 
 type HostDeviceManifestRenderData struct {
 	HostDeviceNetworkName string
+	NetworkNamespace      string
 	CrSpec                mellanoxv1alpha1.HostDeviceNetworkSpec
 	RuntimeSpec           *runtimeSpec
 }
@@ -124,6 +125,7 @@ func (s *stateHostDeviceNetwork) getManifestObjects(
 	cr *mellanoxv1alpha1.HostDeviceNetwork) ([]*unstructured.Unstructured, error) {
 	renderData := &HostDeviceManifestRenderData{
 		HostDeviceNetworkName: cr.Name,
+		NetworkNamespace:      cr.Namespace,
 		CrSpec:                cr.Spec,
 		RuntimeSpec: &runtimeSpec{
 			Namespace: consts.NetworkOperatorResourceNamespace,

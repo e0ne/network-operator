@@ -16,7 +16,6 @@ kind: HostDeviceNetwork
 metadata:
   name: example-hostdevice-network
 spec:
-  networkNamespace: "default"
   ipam: |
     {
       "type": "whereabouts",

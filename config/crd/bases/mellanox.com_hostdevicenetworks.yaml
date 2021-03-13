@@ -14,7 +14,7 @@ spec:
     listKind: HostDeviceNetworkList
     plural: hostdevicenetworks
     singular: hostdevicenetwork
-  scope: Cluster
+  scope: Namespaced
   versions:
   - additionalPrinterColumns:
     - jsonPath: .status.state
@@ -26,7 +26,7 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: MacvlanNetwork is the Schema for the macvlannetworks API
+        description: HostDeviceNetwork is the Schema for the hostdevicenetworks API
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
@@ -45,9 +45,6 @@ spec:
             properties:
               ipam:
                 description: ' configuration to be used for this network.'
-                type: string
-              networkNamespace:
-                description: Namespace of the NetworkAttachmentDefinition custom resource
                 type: string
             type: object
           status:

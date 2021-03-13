@@ -26,8 +26,6 @@ const (
 
 // HostDeviceNetworkSpec defines the desired state of HostDeviceNetwork
 type HostDeviceNetworkSpec struct {
-	// Namespace of the NetworkAttachmentDefinition custom resource
-	NetworkNamespace string `json:"networkNamespace,omitempty"`
 	//  configuration to be used for this network.
 	IPAM string `json:"ipam,omitempty"`
 }
@@ -48,7 +46,7 @@ type HostDeviceNetworkStatus struct {
 // +kubebuilder:object:root=true
 // + =true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:scope=Cluster
+// +kubebuilder:resource:scope=Namespaced
 // +kubebuilder:printcolumn:name="Status",type=string,JSONPath=`.status.state`,priority=0
 // +kubebuilder:printcolumn:name="Age",type=string,JSONPath=`.metadata.creationTimestamp`,priority=0
 

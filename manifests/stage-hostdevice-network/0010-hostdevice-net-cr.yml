@@ -2,7 +2,7 @@ apiVersion: "k8s.cni.cncf.io/v1"
 kind: NetworkAttachmentDefinition
 metadata:
   name: {{.HostDeviceNetworkName}}
-  namespace: {{.CrSpec.NetworkNamespace}}
+  namespace: {{.NetworkNamespace}}
   annotations:
     k8s.v1.cni.cncf.io/resourceName: nvidia.com/mlnx_hostdev
 spec:
