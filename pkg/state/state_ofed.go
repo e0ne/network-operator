@@ -64,6 +64,7 @@ type ofedRuntimeSpec struct {
 	CPUArch    string
 	OSName     string
 	OSVer      string
+	OSKernel   string
 	HTTPProxy  string
 	HTTPSProxy string
 	NoProxy    string
@@ -145,7 +146,7 @@ func (s *stateOFED) getManifestObjects(
 	// Note: it is assumed MOFED driver container is able to handle multiple kernel version e.g by triggering DKMS
 	// if driver was compiled against a missmatching kernel to begin with.
 	if err := s.checkAttributesExist(attrs[0],
-		nodeinfo.AttrTypeCPUArch, nodeinfo.AttrTypeOSName, nodeinfo.AttrTypeOSVer); err != nil {
+		nodeinfo.AttrTypeCPUArch, nodeinfo.AttrTypeOSName, nodeinfo.AttrTypeOSVer, nodeinfo.AttrTypeOSKernel); err != nil {
 		return nil, err
 	}
 
@@ -177,6 +178,7 @@ func (s *stateOFED) getManifestObjects(
 			CPUArch:     attrs[0].Attributes[nodeinfo.AttrTypeCPUArch],
 			OSName:      attrs[0].Attributes[nodeinfo.AttrTypeOSName],
 			OSVer:       attrs[0].Attributes[nodeinfo.AttrTypeOSVer],
+			OSKernel:    attrs[0].Attributes[nodeinfo.AttrTypeOSKernel],
 			HTTPProxy:   os.Getenv(consts.HTTPProxy),
 			HTTPSProxy:  os.Getenv(consts.HTTPSProxy),
 			NoProxy:     os.Getenv(consts.NoProxy),

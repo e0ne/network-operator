@@ -46,6 +46,7 @@ const (
 	AttrTypeCPUArch
 	AttrTypeOSName
 	AttrTypeOSVer
+	AttrTypeOSKernel
 	AttrTypeLast
 )
 
@@ -58,6 +59,8 @@ var attrToLabel = []string{
 	NodeLabelOSName,
 	// AttrTypeOSVer
 	NodeLabelOSVer,
+	// AttrTypeOSKernel
+	NodeLabelKernelVerFull,
 }
 
 // NodeAttributes provides attributes of a specific node

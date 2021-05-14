@@ -69,6 +69,8 @@ spec:
               mountPropagation: Bidirectional
             - name: etc-network
               mountPath: /etc/network
+            - name: modef-storage
+              mountPath: /lib/modules/{{ .RuntimeSpec.OSKernel }}/updates/
           startupProbe:
             exec:
               command:
@@ -101,6 +103,10 @@ spec:
         - name: etc-network
           hostPath:
             path: /etc/network
+        - name: modef-storage
+          hostPath:
+            path: /opt/mofed-v{{ .CrSpec.Version }}-{{ .RuntimeSpec.OSKernel }}
+            type: DirectoryOrCreate
       nodeSelector:
         feature.node.kubernetes.io/pci-15b3.present: "true"
         feature.node.kubernetes.io/system-os_release.ID: {{ .RuntimeSpec.OSName }}
