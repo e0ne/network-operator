@@ -75,6 +75,10 @@ spec:
               mountPropagation: Bidirectional
             - name: etc-network
               mountPath: /etc/network
+            - name: udev
+              mountPath: /etc/udev/rules.d/
+            - name: udev
+              mountPath: /lib/udev/rules.d/
           startupProbe:
             exec:
               command:
@@ -107,6 +111,12 @@ spec:
         - name: etc-network
           hostPath:
             path: /etc/network
+        - name: udev
+          configMap:
+            items:
+              - key: rules
+                path: 82-net-setup-link.rules
+            name: mofed-udev-cm
       nodeSelector:
         feature.node.kubernetes.io/pci-15b3.present: "true"
         feature.node.kubernetes.io/system-os_release.ID: {{ .RuntimeSpec.OSName }}
