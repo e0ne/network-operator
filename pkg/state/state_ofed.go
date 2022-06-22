@@ -17,8 +17,6 @@ limitations under the License.
 package state
 
 import (
-	"os"
-
 	"github.com/pkg/errors"
 	appsv1 "k8s.io/api/apps/v1"
 	v1 "k8s.io/api/core/v1"
@@ -63,12 +61,9 @@ type stateOFED struct {
 
 type ofedRuntimeSpec struct {
 	runtimeSpec
-	CPUArch    string
-	OSName     string
-	OSVer      string
-	HTTPProxy  string
-	HTTPSProxy string
-	NoProxy    string
+	CPUArch string
+	OSName  string
+	OSVer   string
 }
 
 type ofedManifestRenderData struct {
@@ -180,9 +175,6 @@ func (s *stateOFED) getManifestObjects(
 			CPUArch:     attrs[0].Attributes[nodeinfo.AttrTypeCPUArch],
 			OSName:      attrs[0].Attributes[nodeinfo.AttrTypeOSName],
 			OSVer:       attrs[0].Attributes[nodeinfo.AttrTypeOSVer],
-			HTTPProxy:   os.Getenv(consts.HTTPProxy),
-			HTTPSProxy:  os.Getenv(consts.HTTPSProxy),
-			NoProxy:     os.Getenv(consts.NoProxy),
 		},
 		NodeAffinity: cr.Spec.NodeAffinity,
 	}
