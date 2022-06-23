@@ -55,6 +55,12 @@ type PodProbeSpec struct {
 	PeriodSeconds       int `json:"periodSeconds"`
 }
 
+// DriverCertConfigSpec defines custom certificates configuration for driver container
+type DriverCertConfigSpec struct {
+	// +kubebuilder:validation:Optional
+	Name string `json:"name,omitempty"`
+}
+
 // OFEDDriverSpec describes configuration options for OFED driver
 type OFEDDriverSpec struct {
 	// Image information for ofed driver container
@@ -69,6 +75,8 @@ type OFEDDriverSpec struct {
 	Env []v1.EnvVar `json:"env,omitempty"`
 	// Ofed auto-upgrade settings
 	OfedUpgradePolicy *OfedUpgradePolicySpec `json:"upgradePolicy,omitempty"`
+	// Optional: Custom certificates configuration for driver container
+	CertConfig *DriverCertConfigSpec `json:"certConfig,omitempty"`
 }
 
 // NVPeerDriverSpec describes configuration options for NV Peer Memory driver

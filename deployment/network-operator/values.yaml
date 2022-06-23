@@ -148,6 +148,7 @@ ofedDriver:
   # env:
   #   - name: EXAMPLE_ENV_VAR
   #     value: example_env_var_value
+  # certConfig: example_config_name
 
   startupProbe:
     initialDelaySeconds: 10

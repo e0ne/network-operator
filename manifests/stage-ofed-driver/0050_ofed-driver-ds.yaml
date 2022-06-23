@@ -77,9 +77,16 @@ spec:
               mountPath: /host/etc
             - name: host-usr
               mountPath: /host/usr
-
             - name: host-udev
               mountPath: /host/lib/udev
+            {{- if.CertConfigVolumes.VolumeMounts }}
+            {{- range .CertConfigVolumes.VolumeMounts }}
+            - name: {{ .Name }}
+              mountPath: {{ .MountPath }}
+              subPath: {{ .SubPath }}
+              readOnly: {{ .ReadOnly }}
+            {{- end }}
+            {{- end }}
           startupProbe:
             exec:
               command:
@@ -121,6 +128,15 @@ spec:
         - name: host-udev
           hostPath:
             path: /lib/udev
+        {{- if .CertConfigVolumes.Volume.Name }}
+        - name: {{ .CertConfigVolumes.Volume.Name }}
+          configMap:
+            name: {{ .CertConfigVolumes.Volume.ConfigMap.Name }}
+            items:
+            {{- range .CertConfigVolumes.Volume.ConfigMap.Items }}
+            {{ . | yaml | nindentPrefix 14 "- " }}
+            {{- end }}
+        {{- end }}
       nodeSelector:
         feature.node.kubernetes.io/pci-15b3.present: "true"
         feature.node.kubernetes.io/system-os_release.ID: {{ .RuntimeSpec.OSName }}
