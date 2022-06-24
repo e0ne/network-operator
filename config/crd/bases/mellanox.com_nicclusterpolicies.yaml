@@ -412,6 +412,12 @@ spec:
                     - initialDelaySeconds
                     - periodSeconds
                     type: object
+                  repoConfig:
+                    description: 'Optional: Custom repo configuration for OFED container'
+                    properties:
+                      configMapName:
+                        type: string
+                    type: object
                   repository:
                     pattern: '[a-zA-Z0-9\.\-\/]+'
                     type: string

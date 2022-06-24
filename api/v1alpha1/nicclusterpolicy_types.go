@@ -61,6 +61,12 @@ type DriverCertConfigSpec struct {
 	Name string `json:"name,omitempty"`
 }
 
+// DriverRepoConfigSpec defines custom repo configuration for OFED container
+type DriverRepoConfigSpec struct {
+	// +kubebuilder:validation:Optional
+	ConfigMapName string `json:"configMapName,omitempty"`
+}
+
 // OFEDDriverSpec describes configuration options for OFED driver
 type OFEDDriverSpec struct {
 	// Image information for ofed driver container
@@ -77,6 +83,8 @@ type OFEDDriverSpec struct {
 	OfedUpgradePolicy *OfedUpgradePolicySpec `json:"upgradePolicy,omitempty"`
 	// Optional: Custom certificates configuration for driver container
 	CertConfig *DriverCertConfigSpec `json:"certConfig,omitempty"`
+	// Optional: Custom repo configuration for OFED container
+	RepoConfig *DriverRepoConfigSpec `json:"repoConfig,omitempty"`
 }
 
 // NVPeerDriverSpec describes configuration options for NV Peer Memory driver

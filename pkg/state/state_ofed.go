@@ -52,6 +52,12 @@ var CertConfigPathMap = map[string]string{
 	"rhcos":  "/etc/pki/ca-trust/extracted/pem",
 }
 
+// RepoConfigPathMap indicates standard OS specific paths for repository configuration files
+var RepoConfigPathMap = map[string]string{
+	"ubuntu": "/etc/apt/sources.list.d",
+	"rhcos":  "/etc/yum.repos.d",
+}
+
 // NewStateOFED creates a new OFED driver state
 func NewStateOFED(k8sAPIClient client.Client, scheme *runtime.Scheme, manifestDir string) (State, error) {
 	files, err := utils.GetFilesWithSuffix(manifestDir, render.ManifestFileSuffix...)
@@ -76,7 +82,7 @@ type stateOFED struct {
 
 type additionalVolumeMounts struct {
 	VolumeMounts []v1.VolumeMount
-	Volume       v1.Volume
+	Volumes      []v1.Volume
 }
 
 type ofedRuntimeSpec struct {
@@ -87,15 +93,23 @@ type ofedRuntimeSpec struct {
 }
 
 type ofedManifestRenderData struct {
-	CrSpec            *mellanoxv1alpha1.OFEDDriverSpec
-	NodeAffinity      *v1.NodeAffinity
-	RuntimeSpec       *ofedRuntimeSpec
-	CertConfigVolumes additionalVolumeMounts
+	CrSpec                 *mellanoxv1alpha1.OFEDDriverSpec
+	NodeAffinity           *v1.NodeAffinity
+	RuntimeSpec            *ofedRuntimeSpec
+	AdditionalVolumeMounts additionalVolumeMounts
 }
 
 // getCertConfigPath returns the standard OS specific path for ssl keys/certificates
 func getCertConfigPath(osname string) (string, error) {
 	if path, ok := CertConfigPathMap[osname]; ok {
+		return path, nil
+	}
+	return "", fmt.Errorf("distribution not supported")
+}
+
+// getRepoConfigPath returns the standard OS specific path for repository configuration files
+func getRepoConfigPath(osname string) (string, error) {
+	if path, ok := RepoConfigPathMap[osname]; ok {
 		return path, nil
 	}
 	return "", fmt.Errorf("distribution not supported")
@@ -248,9 +262,9 @@ func (s *stateOFED) getManifestObjects(
 	}
 
 	additionalVolMounts := additionalVolumeMounts{}
+	osname := attrs[0].Attributes[nodeinfo.AttrTypeOSName]
 	// set any custom ssl key/certificate configuration provided
 	if cr.Spec.OFEDDriver.CertConfig != nil && cr.Spec.OFEDDriver.CertConfig.Name != "" {
-		osname := attrs[0].Attributes[nodeinfo.AttrTypeOSName]
 		destinationDir, err := getCertConfigPath(osname)
 		if err != nil {
 			return nil, fmt.Errorf("failed to get destination directory for custom repo config: %v", err)
@@ -264,8 +278,26 @@ func (s *stateOFED) getManifestObjects(
 		}
 
 		volume := s.createConfigMapVolume(cr.Spec.OFEDDriver.CertConfig.Name, itemsToInclude)
-		additionalVolMounts.VolumeMounts = volumeMounts
-		additionalVolMounts.Volume = volume
+		additionalVolMounts.VolumeMounts = append(additionalVolMounts.VolumeMounts, volumeMounts...)
+		additionalVolMounts.Volumes = append(additionalVolMounts.Volumes, volume)
+	}
+
+	// set any custom repo configuration provided
+	if cr.Spec.OFEDDriver.RepoConfig != nil && cr.Spec.OFEDDriver.RepoConfig.ConfigMapName != "" {
+		destinationDir, err := getRepoConfigPath(osname)
+		if err != nil {
+			return nil, fmt.Errorf("ERROR: failed to get destination directory for custom repo config: %v", err)
+		}
+		volumeMounts, itemsToInclude, err := s.createConfigMapVolumeMounts(
+			config.FromEnv().State.NetworkOperatorResourceNamespace,
+			cr.Spec.OFEDDriver.RepoConfig.ConfigMapName,
+			destinationDir)
+		if err != nil {
+			return nil, fmt.Errorf("ERROR: failed to create ConfigMap VolumeMounts for custom repo config: %v", err)
+		}
+		volume := s.createConfigMapVolume(cr.Spec.OFEDDriver.CertConfig.Name, itemsToInclude)
+		additionalVolMounts.VolumeMounts = append(additionalVolMounts.VolumeMounts, volumeMounts...)
+		additionalVolMounts.Volumes = append(additionalVolMounts.Volumes, volume)
 	}
 
 	renderData := &ofedManifestRenderData{
@@ -276,8 +308,8 @@ func (s *stateOFED) getManifestObjects(
 			OSName:      attrs[0].Attributes[nodeinfo.AttrTypeOSName],
 			OSVer:       attrs[0].Attributes[nodeinfo.AttrTypeOSVer],
 		},
-		NodeAffinity:      cr.Spec.NodeAffinity,
-		CertConfigVolumes: additionalVolMounts,
+		NodeAffinity:           cr.Spec.NodeAffinity,
+		AdditionalVolumeMounts: additionalVolMounts,
 	}
 	// render objects
 	log.V(consts.LogLevelDebug).Info("Rendering objects", "data:", renderData)

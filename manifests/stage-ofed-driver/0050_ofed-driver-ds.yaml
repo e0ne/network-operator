@@ -79,8 +79,8 @@ spec:
               mountPath: /host/usr
             - name: host-udev
               mountPath: /host/lib/udev
-            {{- if.CertConfigVolumes.VolumeMounts }}
-            {{- range .CertConfigVolumes.VolumeMounts }}
+            {{- if.AdditionalVolumeMounts.VolumeMounts }}
+            {{- range .AdditionalVolumeMounts.VolumeMounts }}
             - name: {{ .Name }}
               mountPath: {{ .MountPath }}
               subPath: {{ .SubPath }}
@@ -128,12 +128,12 @@ spec:
         - name: host-udev
           hostPath:
             path: /lib/udev
-        {{- if .CertConfigVolumes.Volume.Name }}
-        - name: {{ .CertConfigVolumes.Volume.Name }}
+        {{- range .AdditionalVolumeMounts.Volumes }}
+        - name: {{ .Name }}
           configMap:
-            name: {{ .CertConfigVolumes.Volume.ConfigMap.Name }}
+            name: {{ .Name }}
             items:
-            {{- range .CertConfigVolumes.Volume.ConfigMap.Items }}
+            {{- range .ConfigMap.Items }}
             {{ . | yaml | nindentPrefix 14 "- " }}
             {{- end }}
         {{- end }}
