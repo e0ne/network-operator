@@ -295,7 +295,7 @@ func (s *stateOFED) getManifestObjects(
 		if err != nil {
 			return nil, fmt.Errorf("ERROR: failed to create ConfigMap VolumeMounts for custom repo config: %v", err)
 		}
-		volume := s.createConfigMapVolume(cr.Spec.OFEDDriver.CertConfig.Name, itemsToInclude)
+		volume := s.createConfigMapVolume(cr.Spec.OFEDDriver.RepoConfig.ConfigMapName, itemsToInclude)
 		additionalVolMounts.VolumeMounts = append(additionalVolMounts.VolumeMounts, volumeMounts...)
 		additionalVolMounts.Volumes = append(additionalVolMounts.Volumes, volume)
 	}

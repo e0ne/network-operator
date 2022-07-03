@@ -28,9 +28,13 @@ spec:
     env:
       {{ toYaml .Values.ofedDriver.env | nindent 6 }}
     {{- end }}
-    {{- if .Values.ofedDriver.certConfig }}
+    {{- if .Values.ofedDriver.certConfig.name }}
     certConfig:
-      name: {{ .Values.ofedDriver.certConfig }}
+      name: {{ .Values.ofedDriver.certConfig.name }}
+    {{- end }}
+    {{- if .Values.ofedDriver.repoConfig.configMapName }}
+    repoConfig:
+      configMapName: {{ .Values.ofedDriver.repoConfig.configMapName }}
     {{- end }}
     imagePullSecrets: {{ include "network-operator.ofed.imagePullSecrets" . | nindent 4 }}
     startupProbe:

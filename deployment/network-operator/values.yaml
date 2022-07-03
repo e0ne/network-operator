@@ -148,7 +148,12 @@ ofedDriver:
   # env:
   #   - name: EXAMPLE_ENV_VAR
   #     value: example_env_var_value
-  # certConfig: example_config_name
+  # Private mirror repository configuration
+  repoConfig:
+    configMapName: ""
+  # Custom ssl key/certificate configuration
+  certConfig:
+    name: ""
 
   startupProbe:
     initialDelaySeconds: 10
