@@ -64,7 +64,7 @@ type DriverCertConfigSpec struct {
 // DriverRepoConfigSpec defines custom repo configuration for OFED container
 type DriverRepoConfigSpec struct {
 	// +kubebuilder:validation:Optional
-	ConfigMapName string `json:"configMapName,omitempty"`
+	Name string `json:"name,omitempty"`
 }
 
 // OFEDDriverSpec describes configuration options for OFED driver

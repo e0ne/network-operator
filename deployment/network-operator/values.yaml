@@ -150,7 +150,7 @@ ofedDriver:
   #     value: example_env_var_value
   # Private mirror repository configuration
   repoConfig:
-    configMapName: ""
+    name: ""
   # Custom ssl key/certificate configuration
   certConfig:
     name: ""

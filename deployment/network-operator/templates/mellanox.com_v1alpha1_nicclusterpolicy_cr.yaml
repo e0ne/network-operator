@@ -32,9 +32,9 @@ spec:
     certConfig:
       name: {{ .Values.ofedDriver.certConfig.name }}
     {{- end }}
-    {{- if .Values.ofedDriver.repoConfig.configMapName }}
+    {{- if .Values.ofedDriver.repoConfig.name }}
     repoConfig:
-      configMapName: {{ .Values.ofedDriver.repoConfig.configMapName }}
+      name: {{ .Values.ofedDriver.repoConfig.name }}
     {{- end }}
     imagePullSecrets: {{ include "network-operator.ofed.imagePullSecrets" . | nindent 4 }}
     startupProbe:

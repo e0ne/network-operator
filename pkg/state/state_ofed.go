@@ -123,8 +123,8 @@ func (s *stateOFED) createConfigMapVolumeMounts(namespace, configMapName, destin
 	// get the ConfigMap
 	cm := &v1.ConfigMap{}
 
-	opts := client.ObjectKey{Namespace: namespace, Name: configMapName}
-	err := s.client.Get(context.TODO(), opts, cm)
+	objKey := client.ObjectKey{Namespace: namespace, Name: configMapName}
+	err := s.client.Get(context.TODO(), objKey, cm)
 	if err != nil {
 		return nil, nil, fmt.Errorf("ERROR: could not get ConfigMap %s from client: %v", configMapName, err)
 	}
@@ -134,7 +134,7 @@ func (s *stateOFED) createConfigMapVolumeMounts(namespace, configMapName, destin
 	for filename := range cm.Data {
 		filenames = append(filenames, filename)
 	}
-	// sort so volume mounts are added to spec in deterministic order
+	// sort so volume mounts are added to spec in deterministic order to make testing easier
 	sort.Strings(filenames)
 	var itemsToInclude = make([]v1.KeyToPath, 0, len(filenames))
 	var volumeMounts = make([]v1.VolumeMount, 0, len(filenames))
@@ -222,6 +222,21 @@ func (s *stateOFED) GetWatchSources() map[string]*source.Kind {
 	return wr
 }
 
+func (s *stateOFED) mountAdditionalVolumesFromConfigMap(volMounts *additionalVolumeMounts, configMapName, destDir string) error {
+	volumeMounts, itemsToInclude, err := s.createConfigMapVolumeMounts(
+		config.FromEnv().State.NetworkOperatorResourceNamespace,
+		configMapName,
+		destDir)
+	if err != nil {
+		return fmt.Errorf("ERROR: failed to create ConfigMap VolumeMounts for custom repo config: %v", err)
+	}
+	volume := s.createConfigMapVolume(configMapName, itemsToInclude)
+	volMounts.VolumeMounts = append(volMounts.VolumeMounts, volumeMounts...)
+	volMounts.Volumes = append(volMounts.Volumes, volume)
+
+	return nil
+}
+
 func (s *stateOFED) getManifestObjects(
 	cr *mellanoxv1alpha1.NicClusterPolicy,
 	nodeInfo nodeinfo.Provider) ([]*unstructured.Unstructured, error) {
@@ -269,35 +284,24 @@ func (s *stateOFED) getManifestObjects(
 		if err != nil {
 			return nil, fmt.Errorf("failed to get destination directory for custom repo config: %v", err)
 		}
-		volumeMounts, itemsToInclude, err := s.createConfigMapVolumeMounts(
-			config.FromEnv().State.NetworkOperatorResourceNamespace,
-			cr.Spec.OFEDDriver.CertConfig.Name,
-			destinationDir)
-		if err != nil {
-			return nil, fmt.Errorf(" failed to create ConfigMap VolumeMounts for custom certs: %v", err)
-		}
 
-		volume := s.createConfigMapVolume(cr.Spec.OFEDDriver.CertConfig.Name, itemsToInclude)
-		additionalVolMounts.VolumeMounts = append(additionalVolMounts.VolumeMounts, volumeMounts...)
-		additionalVolMounts.Volumes = append(additionalVolMounts.Volumes, volume)
+		err = s.mountAdditionalVolumesFromConfigMap(&additionalVolMounts, cr.Spec.OFEDDriver.CertConfig.Name, destinationDir)
+		if err != nil {
+			return nil, fmt.Errorf("failed to custom certificates: %v", err)
+		}
 	}
 
 	// set any custom repo configuration provided
-	if cr.Spec.OFEDDriver.RepoConfig != nil && cr.Spec.OFEDDriver.RepoConfig.ConfigMapName != "" {
+	if cr.Spec.OFEDDriver.RepoConfig != nil && cr.Spec.OFEDDriver.RepoConfig.Name != "" {
 		destinationDir, err := getRepoConfigPath(osname)
 		if err != nil {
 			return nil, fmt.Errorf("ERROR: failed to get destination directory for custom repo config: %v", err)
 		}
-		volumeMounts, itemsToInclude, err := s.createConfigMapVolumeMounts(
-			config.FromEnv().State.NetworkOperatorResourceNamespace,
-			cr.Spec.OFEDDriver.RepoConfig.ConfigMapName,
-			destinationDir)
+
+		err = s.mountAdditionalVolumesFromConfigMap(&additionalVolMounts, cr.Spec.OFEDDriver.RepoConfig.Name, destinationDir)
 		if err != nil {
-			return nil, fmt.Errorf("ERROR: failed to create ConfigMap VolumeMounts for custom repo config: %v", err)
+			return nil, fmt.Errorf("failed to custom repositories configuration: %v", err)
 		}
-		volume := s.createConfigMapVolume(cr.Spec.OFEDDriver.RepoConfig.ConfigMapName, itemsToInclude)
-		additionalVolMounts.VolumeMounts = append(additionalVolMounts.VolumeMounts, volumeMounts...)
-		additionalVolMounts.Volumes = append(additionalVolMounts.Volumes, volume)
 	}
 
 	renderData := &ofedManifestRenderData{
