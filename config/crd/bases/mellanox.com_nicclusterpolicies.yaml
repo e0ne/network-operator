@@ -1116,6 +1116,65 @@ spec:
                     - repository
                     - version
                     type: object
+                  rdmaCni:
+                    description: Image information for RDMA CNI
+                    properties:
+                      containerResources:
+                        items:
+                          description: ResourceRequirements describes the compute
+                            resource requirements.
+                          properties:
+                            limits:
+                              additionalProperties:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                x-kubernetes-int-or-string: true
+                              description: |-
+                                Limits describes the maximum amount of compute resources allowed.
+                                More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                              type: object
+                            name:
+                              description: Name of the container the requirements
+                                are set for
+                              type: string
+                            requests:
+                              additionalProperties:
+                                anyOf:
+                                - type: integer
+                                - type: string
+                                pattern: ^(\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))(([KMGTPE]i)|[numkMGTPE]|([eE](\+|-)?(([0-9]+(\.[0-9]*)?)|(\.[0-9]+))))?$
+                                x-kubernetes-int-or-string: true
+                              description: |-
+                                Requests describes the minimum amount of compute resources required.
+                                If Requests is omitted for a container, it defaults to Limits if that is explicitly specified,
+                                otherwise to an implementation-defined value. Requests cannot exceed Limits.
+                                More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
+                              type: object
+                          required:
+                          - name
+                          type: object
+                        type: array
+                      image:
+                        pattern: '[a-zA-Z0-9\-]+'
+                        type: string
+                      imagePullSecrets:
+                        default: []
+                        items:
+                          type: string
+                        type: array
+                      repository:
+                        pattern: '[a-zA-Z0-9\.\-\/]+'
+                        type: string
+                      version:
+                        pattern: '[a-zA-Z0-9\.-]+'
+                        type: string
+                    required:
+                    - image
+                    - repository
+                    - version
+                    type: object
                 type: object
               sriovDevicePlugin:
                 description: |-

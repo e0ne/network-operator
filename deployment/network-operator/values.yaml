@@ -411,11 +411,25 @@ secondaryNetwork:
     #     limits:
     #       cpu: "100m"
     #       memory: "50Mi"
-  ipamPlugin:
-    deploy: true
+  rdmaCni:
+    deploy: false
     image: whereabouts
     repository: ghcr.io/k8snetworkplumbingwg
     version: v0.6.2
+    # imagePullSecrets: []
+    # containerResources:
+    #   - name: "rdma-cni"
+    #     requests:
+    #       cpu: "100m"
+    #       memory: "50Mi"
+    #     limits:
+    #       cpu: "100m"
+    #       memory: "50Mi"
+  ipamPlugin:
+    deploy: true
+    image: rdma-cni
+    repository: ghcr.io/k8snetworkplumbingwg
+    version: latest
     # imagePullSecrets: []
     # containerResources:
     #   - name: "whereabouts"

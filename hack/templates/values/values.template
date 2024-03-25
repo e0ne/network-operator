@@ -411,6 +411,20 @@ secondaryNetwork:
     #     limits:
     #       cpu: "100m"
     #       memory: "50Mi"
+  rdmaCni:
+    deploy: false
+    image: {{ .RdmaCni.Image }}
+    repository: {{ .RdmaCni.Repository }}
+    version: {{ .RdmaCni.Version }}
+    # imagePullSecrets: []
+    # containerResources:
+    #   - name: "rdma-cni"
+    #     requests:
+    #       cpu: "100m"
+    #       memory: "50Mi"
+    #     limits:
+    #       cpu: "100m"
+    #       memory: "50Mi"
   ipamPlugin:
     deploy: true
     image: {{ .IpamPlugin.Image }}

@@ -53,10 +53,14 @@ Ipoib:
   image: ipoib-cni
   repository: ghcr.io/mellanox
   version: 428715a57c0b633e48ec7620f6e3af6863149ccf
-IpamPlugin:
+RdmaCni:
   image: whereabouts
   repository: ghcr.io/k8snetworkplumbingwg
   version: v0.6.2
+IpamPlugin:
+  image: rdma-cni
+  repository: ghcr.io/k8snetworkplumbingwg
+  version: latest
 nvIpam:
   image: nvidia-k8s-ipam
   repository: ghcr.io/mellanox

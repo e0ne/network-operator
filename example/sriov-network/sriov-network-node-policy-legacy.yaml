@@ -19,11 +19,13 @@ metadata:
 spec:
   resourceName: sriovlegacy
   nodeSelector:
-    feature.node.kubernetes.io/pci-15b3.present: "true"
-  numVfs: 1
+    #feature.node.kubernetes.io/pci-15b3.present: "true"
+    kubernetes.io/hostname: cloud-dev-13
+    #node-role.kubernetes.io/worker: ""
+  numVfs: 4
   nicSelector:
     vendor: "15b3"
     # you can also specify deviceID from the list: "158b", "1015", "1017"
-    # deviceID: "158b"
+    deviceID: "101d"
   isRdma: true
   eSwitchMode: legacy

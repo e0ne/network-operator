@@ -47,6 +47,7 @@ type Release struct {
 	CniPlugins                   *mellanoxv1alpha1.ImageSpec
 	Multus                       *mellanoxv1alpha1.ImageSpec
 	Ipoib                        *mellanoxv1alpha1.ImageSpec
+	RdmaCni                      *mellanoxv1alpha1.ImageSpec
 	IpamPlugin                   *mellanoxv1alpha1.ImageSpec
 	NvIPAM                       *mellanoxv1alpha1.ImageSpec
 	NicFeatureDiscovery          *mellanoxv1alpha1.ImageSpec

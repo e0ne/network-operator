@@ -71,6 +71,6 @@ spec:
       version: v3.9.3
       config: ''
     ipamPlugin:
-      image: whereabouts
+      image: rdma-cni
       repository: ghcr.io/k8snetworkplumbingwg
-      version: v0.6.2
+      version: latest

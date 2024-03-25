@@ -197,6 +197,8 @@ type SecondaryNetworkSpec struct {
 	IPoIB *ImageSpec `json:"ipoib,omitempty"`
 	// Image information for IPAM plugin
 	IpamPlugin *ImageSpec `json:"ipamPlugin,omitempty"`
+	// Image information for RDMA CNI
+	RdmaCni *ImageSpec `json:"rdmaCni,omitempty"`
 }
 
 // ResourceRequirements describes the compute resource requirements.
