@@ -118,6 +118,14 @@ spec:
               mountPath: /mnt/drivers-inventory
             - name: host-ib-core
               mountPath: /etc/modprobe.d/ib_core.conf
+            - name: sys-path
+              mountPath: /sys
+            - name: systemd-path
+              mountPath: /run/systemd
+            - name: systemd-units
+              mountPath: /etc/systemd/system
+            - name: dbus-socket
+              mountPath: /var/run/dbus
             {{- if.AdditionalVolumeMounts.VolumeMounts }}
             {{- range .AdditionalVolumeMounts.VolumeMounts }}
             - name: {{ .Name }}
@@ -245,6 +253,18 @@ spec:
           hostPath:
             path: /etc/modprobe.d/ib_core.conf
             type: FileOrCreate
+        - name: sys-path
+          hostPath:
+            path: /sys
+        - name: systemd-path
+          hostPath:
+            path: /run/systemd
+        - name: systemd-units
+          hostPath:
+            path: /etc/systemd/system
+        - name: dbus-socket
+          hostPath:
+            path: /var/run/dbus
         {{- range .AdditionalVolumeMounts.Volumes }}
         - name: {{ .Name }}
           {{- if and .ConfigMap .ConfigMap.Items }}
