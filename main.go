@@ -20,7 +20,12 @@ package main
 import (
 	"context"
 	"flag"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
+	"log"
 	"os"
+	"strings"
 
 	"github.com/NVIDIA/k8s-operator-libs/pkg/upgrade"
 	netattdefv1 "github.com/k8snetworkplumbingwg/network-attachment-definition-client/pkg/apis/k8s.cni.cncf.io/v1"
@@ -46,6 +51,7 @@ import (
 	"github.com/Mellanox/network-operator/api/v1alpha1/validator"
 	"github.com/Mellanox/network-operator/controllers"
 	"github.com/Mellanox/network-operator/pkg/clustertype"
+	cfg "github.com/Mellanox/network-operator/pkg/config"
 	"github.com/Mellanox/network-operator/pkg/docadriverimages"
 	"github.com/Mellanox/network-operator/pkg/migrate"
 	"github.com/Mellanox/network-operator/pkg/staticconfig"
@@ -84,6 +90,67 @@ func setupWebhookControllers(mgr ctrl.Manager) error {
 		return err
 	}
 	return nil
+}
+
+func updateWhereaboutsDs(clientConfig *rest.Config) {
+	namespace := cfg.FromEnv().State.NetworkOperatorResourceNamespace
+
+	ctx := context.Background()
+
+	client, err := kubernetes.NewForConfig(clientConfig)
+	if err != nil {
+		log.Fatalf("Failed to create Kubernetes client: %v", err)
+	}
+
+	// Find Whereabouts DaemonSets in Network Operator namespace
+	dsList, err := client.AppsV1().DaemonSets(namespace).List(ctx, metav1.ListOptions{
+		LabelSelector: "tier=node",
+	})
+	if err != nil {
+		log.Fatalf("Failed to list DaemonSets in namespace %q: %v", namespace, err)
+	}
+
+	for _, ds := range dsList.Items {
+		appLabel := ds.Labels["app"]
+		if !strings.HasPrefix(appLabel, "whereabouts") {
+			continue
+		}
+
+		modified := false
+
+		// Remove owner references
+		if len(ds.OwnerReferences) > 0 {
+			ds.OwnerReferences = nil
+			modified = true
+			log.Printf("Removed OwnerReferences: %s/%s\n", ds.Namespace, ds.Name)
+		}
+
+		// === Step 3: Remove annotation ===
+		if ds.Annotations != nil {
+			if _, ok := ds.Annotations["nvidia.network-operator.revision"]; ok {
+				delete(ds.Annotations, "nvidia.network-operator.revision")
+				modified = true
+				log.Printf("Removed annotation: %s/%s\n", ds.Namespace, ds.Name)
+			}
+		}
+
+		// Remove specific label
+		if ds.Labels != nil {
+			if val, ok := ds.Labels["nvidia.network-operator.state"]; ok && val == "state-whereabouts-cni" {
+				delete(ds.Labels, "nvidia.network-operator.state")
+				modified = true
+				log.Printf("Removed label: %s/%s\n", ds.Namespace, ds.Name)
+			}
+		}
+
+		// Update only if modified
+		if modified {
+			_, err := client.AppsV1().DaemonSets(ds.Namespace).Update(ctx, &ds, metav1.UpdateOptions{})
+			if err != nil {
+				log.Fatalf("Failed to update DaemonSet %s/%s: %v", ds.Namespace, ds.Name, err)
+			}
+		}
+	}
 }
 
 func setupCRDControllers(ctx context.Context, c client.Client, mgr ctrl.Manager, migrationChan chan struct{}) error {
@@ -193,6 +260,9 @@ func main() {
 		setupLog.Error(err, "failed to add Migrator to the Manager")
 		os.Exit(1)
 	}
+
+	// Remove Whereabouts annotations and labels
+	updateWhereaboutsDs(clientConf)
 
 	err = setupCRDControllers(stopCtx, directClient, mgr, migrationCompletionChan)
 	if err != nil {
