@@ -17,6 +17,7 @@ import (
 	. "github.com/onsi/ginkgo/v2"
 	. "github.com/onsi/gomega"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
@@ -39,6 +40,108 @@ var _ = Describe("Revision", func() {
 			rev1, err := revision.CalculateRevision(o1)
 			Expect(err).NotTo(HaveOccurred())
 			rev2, err := revision.CalculateRevision(o2)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(rev1).NotTo(Equal(rev2))
+		})
+		It("Should not be equal for DaemonSets with different specs", func() {
+			ds1 := &appsv1.DaemonSet{
+				ObjectMeta: metav1.ObjectMeta{Name: "test-ds", Namespace: "default"},
+				Spec: appsv1.DaemonSetSpec{
+					Selector: &metav1.LabelSelector{
+						MatchLabels: map[string]string{"app": "test"},
+					},
+					Template: corev1.PodTemplateSpec{
+						ObjectMeta: metav1.ObjectMeta{
+							Labels: map[string]string{"app": "test"},
+						},
+						Spec: corev1.PodSpec{
+							Containers: []corev1.Container{
+								{
+									Name:  "container1",
+									Image: "image:v1.0",
+									Args:  []string{"--arg1=value1"},
+								},
+							},
+						},
+					},
+				},
+			}
+			ds2 := &appsv1.DaemonSet{
+				ObjectMeta: metav1.ObjectMeta{Name: "test-ds", Namespace: "default"},
+				Spec: appsv1.DaemonSetSpec{
+					Selector: &metav1.LabelSelector{
+						MatchLabels: map[string]string{"app": "test"},
+					},
+					Template: corev1.PodTemplateSpec{
+						ObjectMeta: metav1.ObjectMeta{
+							Labels: map[string]string{"app": "test"},
+						},
+						Spec: corev1.PodSpec{
+							Containers: []corev1.Container{
+								{
+									Name:  "container1",
+									Image: "image:v1.0",
+									Args:  []string{"--arg1=value1", "--arg2=value2"},
+								},
+							},
+						},
+					},
+				},
+			}
+			rev1, err := revision.CalculateRevision(ds1)
+			Expect(err).NotTo(HaveOccurred())
+			rev2, err := revision.CalculateRevision(ds2)
+			Expect(err).NotTo(HaveOccurred())
+			Expect(rev1).NotTo(Equal(rev2))
+		})
+		It("Should not be equal for DaemonSets with different container args", func() {
+			ds1 := &appsv1.DaemonSet{
+				ObjectMeta: metav1.ObjectMeta{Name: "test-ds", Namespace: "default"},
+				Spec: appsv1.DaemonSetSpec{
+					Selector: &metav1.LabelSelector{
+						MatchLabels: map[string]string{"app": "test"},
+					},
+					Template: corev1.PodTemplateSpec{
+						ObjectMeta: metav1.ObjectMeta{
+							Labels: map[string]string{"app": "test"},
+						},
+						Spec: corev1.PodSpec{
+							Containers: []corev1.Container{
+								{
+									Name:  "container1",
+									Image: "image:v1.0",
+									Args:  []string{"--arg1=value1"},
+								},
+							},
+						},
+					},
+				},
+			}
+			ds2 := &appsv1.DaemonSet{
+				ObjectMeta: metav1.ObjectMeta{Name: "test-ds", Namespace: "default"},
+				Spec: appsv1.DaemonSetSpec{
+					Selector: &metav1.LabelSelector{
+						MatchLabels: map[string]string{"app": "test"},
+					},
+					Template: corev1.PodTemplateSpec{
+						ObjectMeta: metav1.ObjectMeta{
+							Labels: map[string]string{"app": "test"},
+						},
+						Spec: corev1.PodSpec{
+							Containers: []corev1.Container{
+								{
+									Name:  "container1",
+									Image: "image:v1.0",
+									Args:  []string{"--arg1=value2"}, // Different arg value
+								},
+							},
+						},
+					},
+				},
+			}
+			rev1, err := revision.CalculateRevision(ds1)
+			Expect(err).NotTo(HaveOccurred())
+			rev2, err := revision.CalculateRevision(ds2)
 			Expect(err).NotTo(HaveOccurred())
 			Expect(rev1).NotTo(Equal(rev2))
 		})

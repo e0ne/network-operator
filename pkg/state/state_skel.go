@@ -265,7 +265,11 @@ func (s *stateSkel) createOrUpdateObjs(
 			reqLogger.V(consts.LogLevelDebug).Info("Desired object content", "desiredObj", string(desiredJSON))
 		}
 
-		currRev := revision.GetRevision(currentObj)
+		currRev, err := revision.CalculateRevision(currentObj)
+		if err != nil {
+			reqLogger.V(consts.LogLevelWarning).Info("Failed to calculate revision", "error", err)
+			return err
+		}
 		if currRev != 0 && currRev == desiredRev {
 			reqLogger.V(consts.LogLevelInfo).Info("Object is already in sync", "currentRev", currRev, "desiredRev", desiredRev)
 			continue
