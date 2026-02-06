@@ -249,9 +249,25 @@ func (s *stateSkel) createOrUpdateObjs(
 			}
 			continue
 		}
+
+		// Log current and desired object contents for debugging
+		currentJSON, err := json.MarshalIndent(currentObj.Object, "", "  ")
+		if err != nil {
+			reqLogger.V(consts.LogLevelWarning).Info("Failed to marshal currentObj", "error", err)
+		} else {
+			reqLogger.V(consts.LogLevelDebug).Info("Current object content", "currentObj", string(currentJSON))
+		}
+
+		desiredJSON, err := json.MarshalIndent(desiredObj.Object, "", "  ")
+		if err != nil {
+			reqLogger.V(consts.LogLevelWarning).Info("Failed to marshal desiredObj", "error", err)
+		} else {
+			reqLogger.V(consts.LogLevelDebug).Info("Desired object content", "desiredObj", string(desiredJSON))
+		}
+
 		currRev := revision.GetRevision(currentObj)
 		if currRev != 0 && currRev == desiredRev {
-			reqLogger.V(consts.LogLevelInfo).Info("Object is already in sync")
+			reqLogger.V(consts.LogLevelInfo).Info("Object is already in sync", "currentRev", currRev, "desiredRev", desiredRev)
 			continue
 		}
 		// update required
